@@ -53,7 +53,7 @@ model, accuracy = train_loan_model()
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=100)
     st.title("About AI Advisor")
-    st.info("ဤ App သည် AI နည်းပညာဖြင့် ချေးငွေရရှိနိုင်ခြေကို ခန့်မှန်းပေးပါသည်။")
+    st.info("AI နည်းပညာဖြင့် ချေးငွေရရှိနိုင်ခြေကို ခန့်မှန်းပေးပါသည်။")
     st.metric(label="Model Accuracy (AI ၏ တိကျမှုနှုန်း)", value=f"{accuracy*100:.2f}%")
     st.markdown("---")
     st.warning("💡 Credit history ကောင်းမွန်ခြင်းသည် ချေးငွေရရှိရန် အရေးကြီးဆုံးဖြစ်ပါသည်။")
@@ -119,3 +119,4 @@ with col_right:
                     st.success(f"### 🎉 Congratulations! \n\n လူကြီးမင်း၏ ချေးငွေလျှောက်ထားမှုသည် Approved ဖြစ်နိုင်ခြေ များပါသည်။ \n\n (AI Confidence: {accuracy*100:.1f}%)")
                 else:
                     st.error(f"### ❌ Sorry! \n\n လူကြီးမင်း၏ လက်ရှိ အချက်အလက်များအရ ချေးငွေရရှိရန် Rejected ဖြစ်နိုင်ခြေ များပါသည်။ \n\n (AI Confidence: {accuracy*100:.1f}%)")
+
