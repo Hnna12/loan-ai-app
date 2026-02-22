@@ -23,6 +23,9 @@ st.markdown("""
 @st.cache_resource
 def train_loan_model():
     df = pd.read_csv('train.csv')
+    # Copy of original for display
+    raw_df = df.copy()
+    
     cols_to_fill = ['Gender', 'Married', 'Dependents', 'Self_Employed', 'Credit_History', 'Loan_Amount_Term']
     for col in cols_to_fill:
         df[col] = df[col].fillna(df[col].mode()[0])
@@ -45,18 +48,26 @@ def train_loan_model():
     
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
-    return model, acc
+    return model, acc, raw_df
 
-model, accuracy = train_loan_model()
+model, accuracy, raw_df = train_loan_model()
 
 # --- ၂။ Sidebar UI ---
 with st.sidebar:
     st.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=100)
     st.title("About AI Advisor")
     st.info("ဤ App သည် AI နည်းပညာဖြင့် ချေးငွေရရှိနိုင်ခြေကို ခန့်မှန်းပေးပါသည်။")
-    st.metric(label="Model Accuracy (AI ၏ တိကျမှုနှုန်း)", value=f"{accuracy*100:.2f}%")
+    st.metric(label="Model Accuracy", value=f"{accuracy*100:.2f}%")
     st.markdown("---")
-    st.warning("💡 Credit history ကောင်းမွန်ခြင်းသည် ချေးငွေရရှိရန် အရေးကြီးဆုံးဖြစ်ပါသည်။")
+    
+    # --- Dataset Checkbox အပိုင်းကို Sidebar မှာ ထည့်ထားခြင်း ---
+    if st.checkbox("🔍 Dataset ကို ကြည့်မည်"):
+        st.write("### Sample Data")
+        st.dataframe(raw_df.head(10))
+        st.write("### ဒေသအလိုက် Approved ဖြစ်နှုန်း")
+        # Insight Bar Chart
+        insight_data = raw_df.groupby(['Property_Area', 'Loan_Status']).size().unstack()
+        st.bar_chart(insight_data)
 
 # --- ၃။ Main UI Layout ---
 st.title("💰 Smart Loan Approval Advisor")
@@ -66,22 +77,20 @@ col_left, col_right = st.columns([1, 1], gap="large")
 with col_left:
     st.markdown("### လူကြီးမင်း၏ ချေးငွေရလဒ်ကို စစ်ဆေးပါ")
     st.write("ညာဘက်ရှိ ဖောင်တွင် အချက်အလက်များကို မှန်ကန်စွာ ဖြည့်စွက်ပေးပါ။")
-    st.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", use_container_width=True)
-
+    # width="stretch" သုံးပြီး Error ကို ဖြေရှင်းထားပါသည်
+    st.image("https://cdn-icons-png.flaticon.com/512/2830/2830284.png", width=300)
+    
 with col_right:
     st.subheader("📝 အချက်အလက်များ ဖြည့်စွက်ပါ")
     
-    gender = st.selectbox("Gender (ကျား/မ)", ["Male (ကျား)", "Female (မ)"], index=None, placeholder="ရွေးချယ်ရန်")
-    married = st.selectbox("Married Status (အိမ်ထောင်ရှိ/မရှိ)", ["Yes (ရှိ)", "No (မရှိ)"], index=None, placeholder="ရွေးချယ်ရန်")
-    dependents = st.selectbox("Number of Dependents (မှီခိုသူဦးရေ)", [0, 1, 2, 3], index=None, placeholder="ရွေးချယ်ရန်")
-    education = st.selectbox("Education Level (ပညာအရည်အချင်း)", ["Graduate (ဘွဲ့ရ)", "Not Graduate (ဘွဲ့မရ)"], index=None, placeholder="ရွေးချယ်ရန်")
-    
-    income_mmk = st.number_input("Monthly Income (လစဉ်ဝင်ငွေ - ကျပ်)", min_value=0, value=None, placeholder="ဝင်ငွေရိုက်ထည့်ပါ (ဥပမာ- ၅၀၀,၀၀၀)")
-    
-    # Placeholder ထည့်သွင်းထားသော နေရာ
-    loan_amount_mmk = st.number_input("Loan Amount (ချေးယူလိုသောပမာဏ - ကျပ်)", min_value=0, value=None, placeholder="ပမာဏရိုက်ထည့်ပါ (ဥပမာ- ၁,၀၀၀,၀၀၀)")
-    credit_history = st.selectbox("Credit History Score (အကြွေးမှတ်တမ်း)", ["1.0 (ကောင်းမွန်သည်)", "0.0 (မကောင်းပါ)"], index=None, placeholder="ရွေးချယ်ရန်")
-    property_area = st.selectbox("Property Location (နေထိုင်ရာဒေသ)", ["Urban (မြို့ပြ)", "Semiurban (မြို့ဆင်ခြေဖုံး)", "Rural (ကျေးလက်)"], index=None, placeholder="ရွေးချယ်ရန်")
+    gender = st.selectbox("Gender", ["Male (ကျား)", "Female (မ)"], index=None, placeholder="ရွေးချယ်ရန်")
+    married = st.selectbox("Married Status", ["Yes (ရှိ)", "No (မရှိ)"], index=None, placeholder="ရွေးချယ်ရန်")
+    dependents = st.selectbox("Dependents (မှီခိုသူ)", [0, 1, 2, 3], index=None, placeholder="ရွေးချယ်ရန်")
+    education = st.selectbox("Education", ["Graduate (ဘွဲ့ရ)", "Not Graduate (ဘွဲ့မရ)"], index=None, placeholder="ရွေးချယ်ရန်")
+    income_mmk = st.number_input("Monthly Income (ကျပ်)", min_value=0, value=None, placeholder="ဝင်ငွေရိုက်ထည့်ပါ")
+    loan_amount_mmk = st.number_input("Loan Amount (ကျပ်)", min_value=0, value=None, placeholder="ပမာဏရိုက်ထည့်ပါ")
+    credit_history = st.selectbox("Credit History", ["1.0 (ကောင်းမွန်သည်)", "0.0 (မကောင်းပါ)"], index=None, placeholder="ရွေးချယ်ရန်")
+    property_area = st.selectbox("Property Location", ["Urban (မြို့ပြ)", "Semiurban (မြို့ဆင်ခြေဖုံး)", "Rural (ကျေးလက်)"], index=None, placeholder="ရွေးချယ်ရန်")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
